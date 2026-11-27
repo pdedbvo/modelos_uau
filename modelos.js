@@ -55,14 +55,15 @@ window.CONFIG = {
     { prefixo: "DPV", nome: "Despesa com pós venda" },
     { prefixo: "EMP", nome: "Empréstimos", sugerir: "nao-se-enquadra" },
     { prefixo: "MKT", nome: "Despesas com marketing" },
-    { prefixo: "PDV", nome: "Plantão de vendas - obras e reformas" }
-    /* OBR (custos de obra) fica fora de propósito */
+    { prefixo: "PDV", nome: "Plantão de vendas - obras e reformas" },
+    { prefixo: "OBR", nome: "Custos de obra" }
   ],
 
   /* ---------- Cabeçalho comum a todos os modelos ---------- */
   cabecalho: [
     { id: "solicitante", rotulo: "Solicitante", tipo: "texto", meia: true },
-    { id: "area", rotulo: "Área", tipo: "texto", meia: true },
+    { id: "area", rotulo: "Área", tipo: "opcao", meia: true,
+      opcoes: ["CSUA", "CSUM", "EDFC", "EDFE", "ENGA", "ENGE", "ENGO", "Operações", "Incorporação"] },
     { id: "fornecedor", rotulo: "Fornecedor / contratado", tipo: "texto", uau: "Fornecedor / Contratado", meia: true },
     { id: "cnpj", rotulo: "CNPJ / CPF", tipo: "texto", meia: true }
   ],
