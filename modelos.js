@@ -306,7 +306,7 @@ window.CONFIG = {
           { id: "numAditivo", rotulo: "Nº aditivo", tipo: "texto", uau: "Aditivo de Contrato", meia: true },
           { id: "objeto", rotulo: "Objeto do contrato", tipo: "texto", uau: "Objeto" },
           { id: "tipoAditivo", rotulo: "Tipo de aditivo", tipo: "opcao", meia: true, opcoes: ["Valor", "Prazo", "Escopo", "Misto"] },
-          { id: "gestor", rotulo: "Gestor do contrato", tipo: "texto", meia: true }
+          { id: "gestor", rotulo: "Responsável pelo aditivo", tipo: "texto", meia: true }
         ]},
         { titulo: "Justificativa do aditivo", campos: [
           { id: "justificativaAditivo", rotulo: "Por que o contrato precisa mudar", tipo: "textoLongo", dica: "O que aconteceu, o que muda e o que acontece se não aditivar." }
@@ -327,9 +327,9 @@ window.CONFIG = {
         ]},
         { titulo: "Vínculo com o planejamento", campos: [
           { id: "vinculos", rotulo: "Vínculos do valor aditivado", tipo: "tabela", uau: "Insumos Vinculado", total: "valor",
-            dica: "Diga em qual planejamento (insumo de verba) entra a diferença de cada item.",
+            dica: "Escolha o item aditivado e diga em qual planejamento (insumo de verba) entra a diferença dele.",
             colunas: [
-              { id: "item", rotulo: "Item", tipo: "texto", largura: 2.4 },
+              { id: "item", rotulo: "Item aditivado", tipo: "itemDe", fonte: "itens", campo: "item", largura: 2.4 },
               { id: "planejamento", rotulo: "Planejamento / insumo vinculado", tipo: "texto", largura: 2.4 },
               { id: "valor", rotulo: "Valor vinculado", tipo: "moeda", largura: 1.3 }
             ]},
@@ -337,11 +337,11 @@ window.CONFIG = {
             calculo: (v) => (linhasTabela(v.itens).reduce((t, l) => t + num(l.qtdeDepois) * num(l.precoDepois) - num(l.qtdeAntes) * num(l.precoAntes), 0)) - somaTabela(v.vinculos, "valor"),
             justificarSe: (r) => Math.abs(r) > 0.005, pergunta: "O Valor a Vincular não está zerado. Por quê?" }
         ]},
-        { titulo: "Prazo", meia: true, campos: [
+        { titulo: "Prazo", meia: true, semValor: "Não houve mudança de prazo", campos: [
           { id: "prazoAntes", rotulo: "Término anterior", tipo: "data" },
           { id: "prazoDepois", rotulo: "Novo término", tipo: "data" }
         ]},
-        { titulo: "Valor do contrato", meia: true, campos: [
+        { titulo: "Valor do contrato", meia: true, semValor: "Não houve mudança de valor", campos: [
           { id: "valorAntesContrato", rotulo: "Valor antes do aditivo", tipo: "moeda" },
           { id: "valorDiferenca", rotulo: "Diferença do aditivo", tipo: "calculado", formato: "moeda",
             calculo: (v) => linhasTabela(v.itens).reduce((t, l) => t + num(l.qtdeDepois) * num(l.precoDepois) - num(l.qtdeAntes) * num(l.precoAntes), 0) },
