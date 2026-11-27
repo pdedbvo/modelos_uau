@@ -644,7 +644,9 @@
     else if (m.id === "aditivo") { nums = ["CT" + limpa(v.numContrato), "ADT" + limpa(v.numAditivo)]; data = null; }
     else if (m.id === "cotacao") { nums = ["COT" + limpa(v.numCotacao)]; data = null; }
     else if (m.id === "contrato") { nums = ["CT" + limpa(v.numContrato)]; data = v.vigenciaInicio; }
-    else { nums = ["NSE" + limpa(v.numProcesso)]; data = v.vencimento; }
+    else if (v.origem === "Medição") { nums = ["CT" + limpa(v.numContrato), "MED" + limpa(v.numMedicao)]; data = v.vencimento; }
+    else if (v.origem === "Cotação") { nums = ["COT" + limpa(v.numCotacao)]; data = v.vencimento; }
+    else { nums = ["OUT" + limpa(v.numProcesso)]; data = v.vencimento; }
     data = data || hoje;
     return [prefixo, ...nums, limpa(v.fornecedor), data.slice(5, 7) + data.slice(0, 4)].filter(Boolean).join("-");
   }

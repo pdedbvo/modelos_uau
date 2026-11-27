@@ -1,7 +1,7 @@
 # Modelos de lançamento UAU
 
 Plataforma que gera, em PDF no timbrado BE A Moradia do Futuro, o documento que se anexa aos lançamentos no UAU
-(centros de custo que não são obra). Cinco modelos: Medição, Cotação, Contrato, Aditivo e Não se enquadra.
+(centros de custo que não são obra). Cinco modelos: Medição, Cotação, Contrato, Aditivo e Outros pagamentos.
 
 - Nenhum campo é obrigatório. Campo vazio ou comprovante não anexado pede justificativa, que aparece no PDF.
 - Comprovantes (PDF, JPG, PNG, WEBP, GIF, BMP, HEIC) viram páginas do PDF. Nada é enviado para a internet.

@@ -359,22 +359,30 @@ window.CONFIG = {
     },
     {
       id: "nao-se-enquadra",
-      sigla: "NSE",
-      nome: "Não se enquadra",
-      titulo: "Pagamento sem contrato e sem cotação",
-      anexarEm: "Anexe no processo de pagamento no UAU.",
-      descricao: "Aluguel, assinatura, conta de consumo, reembolso e outros pagamentos sem contrato nem cotação.",
+      sigla: "OUT",
+      nome: "Outros pagamentos",
+      titulo: "Outros pagamentos",
+      anexarEm: "Anexe na medição ou na confirmação da cotação no UAU, conforme a origem.",
+      descricao: "Aluguel, assinatura, conta de consumo, reembolso e outros que não se encaixam nos modelos acima.",
       secoes: [
         { titulo: "Pagamento", campos: [
           { id: "categoria", rotulo: "Categoria", tipo: "opcao", meia: true,
             opcoes: ["Aluguel", "Assinatura", "Conta de consumo", "Reembolso", "Outros"] },
+          { id: "origem", rotulo: "Lançado no UAU por", tipo: "opcao", meia: true, opcoes: ["Medição", "Cotação"] },
           { id: "numProcesso", rotulo: "Nº do processo no UAU", tipo: "texto", meia: true },
+          { id: "numContrato", rotulo: "Nº contrato", tipo: "texto", uau: "Nº contrato", meia: true, soSe: { campo: "origem", valor: "Medição" } },
+          { id: "numMedicao", rotulo: "Nº medição", tipo: "texto", uau: "Controle de medições", meia: true, soSe: { campo: "origem", valor: "Medição" } },
+          { id: "valorContrato", rotulo: "Valor do contrato", tipo: "moeda", uau: "Valor do Contrato", meia: true, soSe: { campo: "origem", valor: "Medição" } },
+          { id: "medidoAnterior", rotulo: "Medido até a anterior", tipo: "moeda", meia: true, soSe: { campo: "origem", valor: "Medição" } },
+          { id: "numCotacao", rotulo: "Nº cotação", tipo: "texto", uau: "Mapa de Cotação", meia: true, soSe: { campo: "origem", valor: "Cotação" } },
           { id: "oQueE", rotulo: "O que é", tipo: "textoLongo" },
           { id: "competencia", rotulo: "Mês de competência", tipo: "texto", dica: "ex.: 11/2026", meia: true },
-          { id: "valor", rotulo: "Valor", tipo: "moeda", meia: true },
+          { id: "valor", rotulo: "Valor deste pagamento", tipo: "moeda", meia: true },
+          { id: "saldoNse", rotulo: "Saldo do contrato depois deste pagamento", tipo: "calculado", formato: "moeda", destaque: true, soSe: { campo: "origem", valor: "Medição" },
+            calculo: (v) => num(v.valorContrato) ? num(v.valorContrato) - num(v.medidoAnterior) - num(v.valor) : null },
           { id: "vencimento", rotulo: "Vencimento", tipo: "data", meia: true },
           { id: "recorrencia", rotulo: "Recorrência", tipo: "opcao", meia: true, opcoes: ["Único", "Mensal", "Outra"] },
-          { id: "semContrato", rotulo: "Por que não tem contrato nem cotação", tipo: "textoLongo" }
+          { id: "semContrato", rotulo: "Por que não se encaixa nos outros modelos", tipo: "textoLongo", semValor: "Sem justificativa (fica a critério de quem aprova)" }
         ]},
         { titulo: "Observações", campos: [
           { id: "observacoes", rotulo: "Observações", tipo: "textoLongo", semValor: "Sem observação" }
