@@ -238,13 +238,16 @@ window.CONFIG = {
               { id: "qtde", rotulo: "Qtde.", tipo: "numero", largura: 0.8 },
               { id: "preco", rotulo: "Preço unit.", tipo: "moeda", largura: 1.3 },
               { id: "valor", rotulo: "Valor", tipo: "calculado", formato: "moeda", largura: 1.3, calculo: (l) => num(l.qtde) * num(l.preco) }
-            ]}
+            ]},
+          { id: "difItens", rotulo: "Falta para fechar o valor total", tipo: "calculado", formato: "moeda", destaque: true,
+            dica: "A soma dos itens tem que dar exatamente o valor total do contrato.",
+            calculo: (v) => num(v.valorTotal) ? num(v.valorTotal) - somaTabela(v.itens, "valor") : null }
         ]},
         { titulo: "Vínculo com o planejamento", campos: [
           { id: "vinculos", rotulo: "Vínculos", tipo: "tabela", uau: "Insumos Vinculado", total: "valor",
-            dica: "Diga em qual planejamento (insumo de verba) cada item entra. Um item pode ser dividido em mais de um.",
+            dica: "Escolha um dos itens de cima e diga em qual planejamento (insumo de verba) ele entra. Um item pode ser dividido em mais de um. Cada item tem que ficar 100% vinculado.",
             colunas: [
-              { id: "item", rotulo: "Item do contrato", tipo: "texto", largura: 2.4 },
+              { id: "item", rotulo: "Item do contrato", tipo: "itemDe", fonte: "itens", campo: "descricao", largura: 2.4 },
               { id: "planejamento", rotulo: "Planejamento / insumo vinculado", tipo: "texto", largura: 2.4 },
               { id: "valor", rotulo: "Valor vinculado", tipo: "moeda", largura: 1.3 }
             ]},
@@ -253,16 +256,15 @@ window.CONFIG = {
           { id: "valorVinculado", rotulo: "Valor Vinculado", tipo: "calculado", formato: "moeda", meia: true,
             calculo: (v) => somaTabela(v.vinculos, "valor") },
           { id: "valorAVincular", rotulo: "Valor a Vincular", tipo: "calculado", formato: "moeda", destaque: true,
-            calculo: (v) => (num(v.valorTotal) || somaTabela(v.itens, "valor")) - somaTabela(v.vinculos, "valor"),
-            justificarSe: (r) => Math.abs(r) > 0.005, pergunta: "O Valor a Vincular não está zerado. Por quê?" }
+            calculo: (v) => (num(v.valorTotal) || somaTabela(v.itens, "valor")) - somaTabela(v.vinculos, "valor") }
         ]},
         { titulo: "Condições", campos: [
           { id: "formaMedicao", rotulo: "Como será medido", tipo: "opcao", meia: true, opcoes: ["Mensal fixo", "Por entrega", "Por quantidade", "Outro"] },
-          { id: "reajuste", rotulo: "Reajuste (índice e data-base)", tipo: "texto", meia: true },
-          { id: "cronograma", rotulo: "Cronograma de pagamentos", tipo: "textoLongo" },
+          { id: "reajuste", rotulo: "Reajuste (índice e data-base)", tipo: "texto", semValor: "Não tem reajuste", meia: true },
+          { id: "cronograma", rotulo: "Cronograma de pagamentos", tipo: "textoLongo", soSe: { campo: "formaMedicao", valores: ["Por entrega", "Por quantidade", "Outro"] } },
           { id: "retencao", rotulo: "Retenção / garantia", tipo: "texto", semValor: "Não tem retenção", uau: "Retenção", meia: true },
           { id: "adiantamento", rotulo: "Adiantamento", tipo: "opcao", uau: "Permitir adiantamentos parciais", meia: true, opcoes: ["Não", "Sim"] },
-          { id: "tributos", rotulo: "Tributos retidos (ISS, INSS, IR)", tipo: "texto", uau: "Usar configuração de tributos" }
+          { id: "tributos", rotulo: "Tributos retidos (ISS, INSS, IR)", tipo: "texto", semValor: "Não tem tributos retidos", uau: "Usar configuração de tributos" }
         ]},
         { titulo: "Observações", campos: [
           { id: "observacoes", rotulo: "Observações", tipo: "textoLongo", semValor: "Sem observação" }
@@ -270,7 +272,24 @@ window.CONFIG = {
       ],
       anexos: [
         { id: "contrato", rotulo: "Contrato assinado" }
-      ]
+      ],
+      /* Regras que impedem gerar o PDF enquanto não fecham. */
+      travas: (v) => {
+        const out = [], ok = (a, b) => Math.abs(a - b) < 0.005, m = (x) => x.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+        const cheia = (l) => Object.values(l || {}).some((x) => String(x == null ? "" : x).trim() !== "");
+        const itens = linhasTabela(v.itens).filter(cheia).map((l, i) => ({ nome: String(l.descricao || "").trim() || "Item " + (i + 1), valor: num(l.qtde) * num(l.preco) }));
+        const total = num(v.valorTotal) || itens.reduce((t, i) => t + i.valor, 0);
+        const somaItens = itens.reduce((t, i) => t + i.valor, 0);
+        if (num(v.valorTotal) && !ok(somaItens, num(v.valorTotal))) out.push("A soma dos itens (" + m(somaItens) + ") precisa ser igual ao valor total (" + m(num(v.valorTotal)) + ").");
+        const vinc = linhasTabela(v.vinculos).filter(cheia);
+        for (const it of itens) {
+          const s = vinc.filter((l) => String(l.item || "").trim() === it.nome).reduce((t, l) => t + num(l.valor), 0);
+          if (vinc.length && !ok(s, it.valor)) out.push("O item \"" + it.nome + "\" vale " + m(it.valor) + " e está vinculado em " + m(s) + ".");
+        }
+        if (vinc.some((l) => !String(l.item || "").trim())) out.push("Tem vínculo sem item escolhido.");
+        if (total && !ok(somaTabela(v.vinculos, "valor"), total)) out.push("O Valor a Vincular precisa ficar zerado.");
+        return out;
+      }
     },
 
     {

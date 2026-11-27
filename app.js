@@ -62,7 +62,8 @@
   }
   function visivel(c) {
     if (!c.soSe) return true;
-    return estado.valores[c.soSe.campo] === c.soSe.valor;
+    const atual = estado.valores[c.soSe.campo];
+    return c.soSe.valores ? c.soSe.valores.includes(atual) : atual === c.soSe.valor;
   }
   function linhasPreenchidas(id) {
     const m = modelo();
@@ -94,6 +95,7 @@
     }
     return out;
   }
+  function travas() { const m = modelo(); materializar(); return m && m.travas ? m.travas(estado.valores) : []; }
   function faltando() { return pendencias().filter((p) => vazio(estado.just[p.chave])); }
 
   /* ---------------- render ---------------- */
@@ -257,6 +259,8 @@
       if (s.meia && prox && prox.meia) { sec.append(el("div", { class: "duas" }, blocoSecao(s), blocoSecao(prox))); i += 2; }
       else { sec.append(blocoSecao(s)); i++; }
     }
+    const tr = travas();
+    if (tr.length) sec.append(el("div", { class: "travas" }, el("b", {}, "Para gerar o PDF, ainda falta fechar:"), el("ul", {}, tr.map((t) => el("li", {}, t)))));
     return sec;
   }
   function blocoSecao(s) {
@@ -403,6 +407,14 @@
       chaveMin ? justificativa(chaveMin, c.perguntaMinimo) : null);
   }
   function celula(c, k, l, i) {
+    if (k.tipo === "itemDe") {
+      const nomes = linhasPreenchidas(k.fonte).map((x, j) => String(x[k.campo] || "").trim() || "Item " + (j + 1));
+      const atual = l[k.id] || "";
+      const opts = [el("option", { value: "" }, nomes.length ? "Escolha o item…" : "Preencha os itens acima")]
+        .concat(nomes.map((n) => el("option", { value: n, selected: n === atual ? true : null }, n)));
+      if (atual && !nomes.includes(atual)) opts.push(el("option", { value: atual, selected: true }, atual + " (não está mais nos itens)"));
+      return el("select", { "data-k": c.id + "." + i + "." + k.id, "aria-label": k.rotulo, onchange: (e) => { l[k.id] = e.target.value; recalcular(); renderDepois(); } }, opts);
+    }
     if (k.tipo === "data") return campoData(l[k.id], (val) => { l[k.id] = val; }, { "data-k": c.id + "." + i + "." + k.id, "aria-label": k.rotulo });
     if (k.tipo === "calculado") return el("div", { class: "calc", "data-calc": c.id + "." + i + "." + k.id }, formatarCalc(k, calcular(k, l)));
     const tipo = k.tipo === "data" ? "date" : "text";
@@ -523,6 +535,8 @@
   async function gerar() {
     const m = modelo();
     estado.tentou = true;
+    const tr = travas();
+    if (tr.length) { render(); aviso(tr[0] + (tr.length > 1 ? " (e mais " + (tr.length - 1) + ")" : ""), true); return; }
     const f = faltando();
     if (f.length) {
       render();

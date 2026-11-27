@@ -203,3 +203,7 @@ table.tab td .calc { min-height: 35px; padding: 7px 8px; text-align: right; }
 .dica-uau b { flex: none; background: var(--preto); color: var(--branco); border-radius: 99px; padding: 4px 12px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
 .dica-form { margin: -8px 0 16px; color: var(--cinza); font-size: 14px; }
 @media (max-width: 560px) { .dica-uau { flex-direction: column; align-items: flex-start; } }
+
+.travas { border: 1.5px solid var(--vermelho); border-radius: var(--raio); padding: 16px 20px; margin-bottom: 14px; color: var(--vermelho); font-size: 14px; }
+.travas ul { margin: 8px 0 0; padding-left: 18px; color: var(--preto); }
+.travas li + li { margin-top: 4px; }
