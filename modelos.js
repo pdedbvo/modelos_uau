@@ -26,8 +26,22 @@ window.CONFIG = {
 
   /* ---------- Empresas e centros de custo ---------- */
   /* Cada empresa tem um final (sufixo). O centro de custo é prefixo + sufixo, ex.: ADM09. */
+  /* "principal: true" aparece direto na lista. As outras ficam no botão "Outras empresas".
+     "extras" acrescenta centros de custo que só existem naquela empresa; "sem" tira os que ela não tem. */
   empresas: [
-    { codigo: "19", nome: "BE T09 Empreendimento Imobiliário SCP", sufixo: "09" }
+    { codigo: "19", nome: "BE T09 Empreendimento Imobiliário SCP", sufixo: "09", principal: true },
+    { codigo: "6", nome: "Empresa 6", sufixo: "06", principal: true },
+    { codigo: "2", nome: "Empresa 2", sufixo: "02", principal: true },
+    { codigo: "275", nome: "BE Kaa Square Empreendimento Imobiliário Ltda (BE Garden)", sufixo: "BK", principal: true, sem: ["PDV"],
+      extras: [{ prefixo: "DIS", codigo: "DISBR", nome: "Distribuição de lucro - SPE", sugerir: "nao-se-enquadra" }] },
+    { codigo: "289", nome: "BE Bonifácio Empreendimento Imobiliário Ltda", sufixo: "BO", principal: true, sem: ["PDV"] },
+    { codigo: "", nome: "Empresa final 01", sufixo: "01" },
+    { codigo: "", nome: "Empresa final 03", sufixo: "03" },
+    { codigo: "", nome: "Empresa final 04", sufixo: "04" },
+    { codigo: "", nome: "Empresa final 05", sufixo: "05" },
+    { codigo: "", nome: "Empresa final 07", sufixo: "07" },
+    { codigo: "", nome: "Empresa final 08", sufixo: "08" },
+    { codigo: "", nome: "Empresa final 10", sufixo: "10" }
   ],
   centrosDeCusto: [
     { prefixo: "ADM", nome: "Despesas administrativas" },
