@@ -7,22 +7,74 @@
 <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
-<header class="topo">
-  <div class="topo-in">
+<div class="wrap">
+<nav class="nav">
+  <span class="mk">Grupo DBVO <span>· Modelos de lançamento</span></span>
+  <a class="chip" href="#comecar">Começar</a>
+</nav>
+
+<header class="hz">
+  <div class="hz-pat"></div><div class="hz-brilho"></div>
+  <div class="hz-in">
     <div>
-      <div class="eyebrow claro">Ferramentas DBVO</div>
+      <div class="hz-eb">Grupo DBVO · Financeiro e suprimentos</div>
       <h1>Modelos de lançamento</h1>
-      <p class="sub">Gere o documento para anexar no UAU em poucos minutos.</p>
+      <p class="l">O documento padrão para anexar no UAU em cada pagamento fora de obra. Preencha, junte os comprovantes e baixe um PDF pronto no papel timbrado.</p>
     </div>
-    <label class="btn btn-claro" id="btnImportar">
-      Importar PDF para editar
-      <input type="file" accept="application/pdf,.pdf" id="inpImportar" hidden>
-    </label>
+    <div class="hz-acao">
+      <div class="hz-num"><span><b>5</b>modelos</span><span><b>1</b>PDF por lançamento</span><span><b>0</b>campos obrigatórios</span></div>
+      <div class="hz-bts">
+        <a class="pill" href="#comecar">Começar agora</a>
+        <label class="pill ol" id="btnImportar">Importar PDF para editar
+          <input type="file" accept="application/pdf,.pdf" id="inpImportar" hidden>
+        </label>
+      </div>
+    </div>
   </div>
-  <div class="chevrons" aria-hidden="true"></div>
 </header>
 
+<section class="bl">
+  <div class="cab">
+    <div><div class="eyebrow">Por que existe</div><h2 class="h2">Por que estamos fazendo isso</h2></div>
+    <p class="sub">Hoje cada pessoa anexa um arquivo diferente, e quem aprova precisa caçar a informação.</p>
+  </div>
+  <div class="porques">
+    <div class="pq"><i>01</i><b>Tudo no mesmo lugar</b><span>Valores, contrato, fornecedor e comprovantes num único PDF, anexado direto no UAU.</span></div>
+    <div class="pq"><i>02</i><b>Aprovação mais rápida</b><span>Quem aprova lê sempre o mesmo formato e encontra o que precisa sem pedir mais nada.</span></div>
+    <div class="pq"><i>03</i><b>Histórico e auditoria</b><span>Cada pagamento fica explicado: o que foi pago, por quê e com qual comprovação.</span></div>
+  </div>
+</section>
+
+<section class="bl">
+  <div class="regra">
+    <div class="regra-t">
+      <div class="eyebrow claro">A regra</div>
+      <h2 class="h2">Todo lançamento fora de obra leva o modelo anexado</h2>
+    </div>
+    <ul class="regra-l">
+      <li><b>Vale para</b> todos os centros de custo, exceto obra (OBR).</li>
+      <li><b>Nenhum campo é obrigatório</b>, mas o que ficar vazio pede uma justificativa, que aparece no PDF.</li>
+      <li><b>Cotação</b>: o esperado são 3 propostas. Com menos, explique o motivo.</li>
+      <li><b>A aprovação</b> continua no UAU, como hoje.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="bl">
+  <div class="cab">
+    <div><div class="eyebrow">Passo a passo</div><h2 class="h2">Como usar</h2></div>
+    <p class="sub">Leva poucos minutos. Faça depois do lançamento no UAU, quando já tiver os números.</p>
+  </div>
+  <div class="fluxo">
+    <div class="fx"><i>1</i><div><b>Lance no UAU</b><span>Cadastre a medição, cotação, contrato ou aditivo e anote o número.</span></div></div>
+    <div class="fx"><i>2</i><div><b>Preencha aqui</b><span>Escolha o modelo, a empresa e o centro de custo. Contratos já cadastrados se preenchem sozinhos.</span></div></div>
+    <div class="fx"><i>3</i><div><b>Junte comprovantes</b><span>NF, propostas e fotos (PDF, imagem ou foto do iPhone) viram páginas do PDF.</span></div></div>
+    <div class="fx"><i>4</i><div><b>Anexe no UAU</b><span>Baixe o PDF e anexe na tela indicada. Precisa corrigir? Importe o PDF e gere a v2.</span></div></div>
+  </div>
+</section>
+
 <main id="app" class="conteudo"></main>
+</div>
 
 <div id="aviso" class="aviso" role="status" aria-live="polite" hidden></div>
 

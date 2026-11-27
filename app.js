@@ -152,12 +152,13 @@
   }
 
   function passoModelo() {
-    return el("section", { class: "passo" },
+    return el("section", { class: "passo", id: "comecar" },
       el("div", { class: "eyebrow" }, "Passo 1"),
       el("h2", {}, "Qual é o lançamento?"),
       el("div", { class: "cards" }, C.modelos.map((m) =>
         el("button", { class: "card" + (estado.modeloId === m.id ? " ativo" : ""), type: "button",
           onclick: () => trocarModelo(m.id) },
+          el("div", { class: "card-ic" }, m.sigla),
           el("div", { class: "card-t" }, m.nome),
           el("div", { class: "card-d" }, m.descricao))))
     );
