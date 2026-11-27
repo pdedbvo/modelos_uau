@@ -30,8 +30,8 @@ window.CONFIG = {
      "extras" acrescenta centros de custo que só existem naquela empresa; "sem" tira os que ela não tem. */
   empresas: [
     { codigo: "19", nome: "BE T09 Empreendimento Imobiliário SCP", sufixo: "09", principal: true },
-    { codigo: "", nome: "Empresa final 06", sufixo: "06", principal: true },
-    { codigo: "", nome: "Empresa final 02", sufixo: "02", principal: true },
+    { codigo: "6", nome: "Empresa 6", sufixo: "06", principal: true },
+    { codigo: "2", nome: "Empresa 2", sufixo: "02", principal: true },
     { codigo: "275", nome: "BE Kaa Square Empreendimento Imobiliário Ltda (BE Garden)", sufixo: "BK", principal: true, sem: ["PDV"],
       extras: [{ prefixo: "DIS", codigo: "DISBR", nome: "Distribuição de lucro - SPE", sugerir: "nao-se-enquadra" }] },
     { codigo: "289", nome: "BE Bonifácio Empreendimento Imobiliário Ltda", sufixo: "BO", principal: true, sem: ["PDV"] },
