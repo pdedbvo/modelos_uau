@@ -62,7 +62,8 @@ window.CONFIG = {
   /* ---------- Cabeçalho comum a todos os modelos ---------- */
   cabecalho: [
     { id: "solicitante", rotulo: "Solicitante", tipo: "texto", meia: true },
-    { id: "area", rotulo: "Área", tipo: "texto", meia: true },
+    { id: "area", rotulo: "Área", tipo: "opcao", meia: true,
+      opcoes: ["CSUA", "CSUM", "EDFC", "EDFE", "ENGA", "ENGE", "ENGO", "Operações", "Incorporação"] },
     { id: "fornecedor", rotulo: "Fornecedor / contratado", tipo: "texto", uau: "Fornecedor / Contratado", meia: true },
     { id: "cnpj", rotulo: "CNPJ / CPF", tipo: "texto", meia: true }
   ],
