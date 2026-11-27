@@ -63,7 +63,8 @@ window.CONFIG = {
   cabecalho: [
     { id: "solicitante", rotulo: "Solicitante", tipo: "texto", meia: true },
     { id: "area", rotulo: "Área", tipo: "opcao", meia: true,
-      opcoes: ["CSUA", "CSUM", "EDFC", "EDFE", "ENGA", "ENGE", "ENGO", "Operações", "Incorporação"] },
+      opcoes: ["CSUA", "CSUM", "EDFC", "EDFE", "ENGA", "ENGE", "ENGO", "Outros"] },
+    { id: "areaOutra", rotulo: "Qual área?", tipo: "texto", meia: true, soSe: { campo: "area", valor: "Outros" } },
     { id: "fornecedor", rotulo: "Fornecedor / contratado", tipo: "texto", uau: "Fornecedor / Contratado", meia: true },
     { id: "cnpj", rotulo: "CNPJ / CPF", tipo: "texto", meia: true }
   ],

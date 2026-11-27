@@ -222,7 +222,7 @@
       campoBox({ id: "cc", rotulo: "Centro de custo", uau: "Obra", meia: true }, el("select", { disabled: !empresa, onchange: (e) => { estado.cc = e.target.value; render(); } },
         el("option", { value: "" }, empresa ? "Escolha…" : "Escolha a empresa primeiro"),
         ccs.map((c) => el("option", { value: c.cod, selected: c.cod === estado.cc }, c.cod + " · " + c.nome))), "cc"),
-      C.cabecalho.map((c) => campo(c))
+      C.cabecalho.filter(visivel).map((c) => campo(c))
     );
     return el("section", { class: "passo" },
       el("div", { class: "eyebrow" }, "Passo 2"),
@@ -523,7 +523,7 @@
     secoes.push({ titulo: "Identificação", campos: [
       { rotulo: "Empresa", valor: empresa ? (empresa.codigo ? empresa.codigo + " · " : "") + empresa.nome : "", meia: true },
       { rotulo: "Centro de custo (obra UAU)", valor: ccCfg ? estado.cc + " · " + ccCfg.nome : "", meia: true },
-      ...C.cabecalho.map((c) => ({ rotulo: c.rotulo, valor: fmtVal(c, estado.valores[c.id]), meia: c.meia }))
+      ...C.cabecalho.filter(visivel).map((c) => ({ rotulo: c.rotulo, valor: fmtVal(c, estado.valores[c.id]), meia: c.meia }))
     ]});
     for (const s of m.secoes) {
       const campos = [];
