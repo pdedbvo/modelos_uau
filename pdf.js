@@ -288,6 +288,10 @@
       const linhas = quebrar(p.rotulo + ": não anexado. Justificativa: " + (p.justificativa || ""), f, 8.2, wi);
       itensLista.push({ h: linhas.length * 10.5 + 4, draw(pg, xx, yy) { linhas.forEach((ln, k) => texto(pg, ln, xx, yy - 8.5 - k * 10.5, 8.2, k === 0 ? f : f, CINZA)); } });
     });
+    (dados.anexosSem || []).forEach((s) => {
+      const linhas = quebrar(s.rotulo + ": " + (s.motivo || "não tem") + ".", f, 8.2, wi);
+      itensLista.push({ h: linhas.length * 10.5 + 4, draw(pg, xx, yy) { linhas.forEach((ln, k) => texto(pg, ln, xx, yy - 8.5 - k * 10.5, 8.2, f, CINZA)); } });
+    });
     if (!itensLista.length) itensLista.push({ h: 14, draw(p, xx, yy) { texto(p, "Nenhum comprovante anexado.", xx, yy - 8.5, 8.2, f, CINZA); } });
     blocoSecao("Comprovantes", itensLista);
     void paginasForm; void proxima;

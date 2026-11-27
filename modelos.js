@@ -63,7 +63,8 @@ window.CONFIG = {
   cabecalho: [
     { id: "solicitante", rotulo: "Solicitante", tipo: "texto", meia: true },
     { id: "area", rotulo: "Área", tipo: "opcao", meia: true,
-      opcoes: ["CSUA", "CSUM", "EDFC", "EDFE", "ENGA", "ENGE", "ENGO", "Operações", "Incorporação"] },
+      opcoes: ["CSUA", "CSUM", "EDFC", "EDFE", "ENGA", "ENGE", "ENGO", "Outros"] },
+    { id: "areaOutra", rotulo: "Qual área?", tipo: "texto", meia: true, soSe: { campo: "area", valor: "Outros" } },
     { id: "fornecedor", rotulo: "Fornecedor / contratado", tipo: "texto", uau: "Fornecedor / Contratado", meia: true },
     { id: "cnpj", rotulo: "CNPJ / CPF", tipo: "texto", meia: true }
   ],
@@ -133,19 +134,19 @@ window.CONFIG = {
         ]},
         { titulo: "Boletim", meia: true, campos: [
           { id: "subtotal", rotulo: "Subtotal", tipo: "calculado", formato: "moeda", calculo: (v) => somaTabela(v.itens, "valor") },
-          { id: "descontoNormal", rotulo: "Desconto Normal", tipo: "moeda", uau: "Desconto Normal" },
-          { id: "retencao", rotulo: "Retenção", tipo: "moeda", uau: "Retenção" },
-          { id: "adiantamentos", rotulo: "Adiantamentos/Abatimentos", tipo: "moeda", uau: "Adiantamentos/Abatimentos" },
+          { id: "descontoNormal", rotulo: "Desconto Normal", tipo: "moeda", semValor: "Não tem desconto", uau: "Desconto Normal" },
+          { id: "retencao", rotulo: "Retenção", tipo: "moeda", semValor: "Não tem retenção", uau: "Retenção" },
+          { id: "adiantamentos", rotulo: "Adiantamentos/Abatimentos", tipo: "moeda", semValor: "Não tem adiantamento/abatimento", uau: "Adiantamentos/Abatimentos" },
           { id: "valorLiquido", rotulo: "Valor Líquido Final", tipo: "calculado", formato: "moeda", destaque: true,
             calculo: (v) => somaTabela(v.itens, "valor") - num(v.descontoNormal) - num(v.retencao) + num(v.adiantamentos) }
         ]},
-        { titulo: "Nota fiscal", campos: [
+        { titulo: "Nota fiscal", semValor: "Não tem / Não recebi a nota", semAnexos: ["nf"], campos: [
           { id: "nfNumero", rotulo: "Nº NF", tipo: "texto", uau: "Documento fiscal", meia: true },
           { id: "nfEmissao", rotulo: "Emissão", tipo: "data", meia: true },
           { id: "nfVencimento", rotulo: "Vencimento", tipo: "data", meia: true }
         ]},
         { titulo: "Observações", campos: [
-          { id: "observacoes", rotulo: "Observações", tipo: "textoLongo" }
+          { id: "observacoes", rotulo: "Observações", tipo: "textoLongo", semValor: "Sem observação" }
         ]}
       ],
       anexos: [
@@ -202,7 +203,7 @@ window.CONFIG = {
           { id: "entregaFinal", rotulo: "Data de entrega acordada", tipo: "data", meia: true }
         ]},
         { titulo: "Observações", campos: [
-          { id: "observacoes", rotulo: "Observações", tipo: "textoLongo" }
+          { id: "observacoes", rotulo: "Observações", tipo: "textoLongo", semValor: "Sem observação" }
         ]}
       ],
       anexos: [
@@ -258,12 +259,12 @@ window.CONFIG = {
           { id: "formaMedicao", rotulo: "Como será medido", tipo: "opcao", meia: true, opcoes: ["Mensal fixo", "Por entrega", "Por quantidade", "Outro"] },
           { id: "reajuste", rotulo: "Reajuste (índice e data-base)", tipo: "texto", meia: true },
           { id: "cronograma", rotulo: "Cronograma de pagamentos", tipo: "textoLongo" },
-          { id: "retencao", rotulo: "Retenção / garantia", tipo: "texto", uau: "Retenção", meia: true },
+          { id: "retencao", rotulo: "Retenção / garantia", tipo: "texto", semValor: "Não tem retenção", uau: "Retenção", meia: true },
           { id: "adiantamento", rotulo: "Adiantamento", tipo: "opcao", uau: "Permitir adiantamentos parciais", meia: true, opcoes: ["Não", "Sim"] },
           { id: "tributos", rotulo: "Tributos retidos (ISS, INSS, IR)", tipo: "texto", uau: "Usar configuração de tributos" }
         ]},
         { titulo: "Observações", campos: [
-          { id: "observacoes", rotulo: "Observações", tipo: "textoLongo" }
+          { id: "observacoes", rotulo: "Observações", tipo: "textoLongo", semValor: "Sem observação" }
         ]}
       ],
       anexos: [
@@ -327,7 +328,7 @@ window.CONFIG = {
             calculo: (v) => num(v.valorAntesContrato) + linhasTabela(v.itens).reduce((t, l) => t + num(l.qtdeDepois) * num(l.precoDepois) - num(l.qtdeAntes) * num(l.precoAntes), 0) }
         ]},
         { titulo: "Observações", campos: [
-          { id: "observacoes", rotulo: "Observações", tipo: "textoLongo" }
+          { id: "observacoes", rotulo: "Observações", tipo: "textoLongo", semValor: "Sem observação" }
         ]}
       ],
       anexos: [
@@ -355,11 +356,11 @@ window.CONFIG = {
           { id: "semContrato", rotulo: "Por que não tem contrato nem cotação", tipo: "textoLongo" }
         ]},
         { titulo: "Observações", campos: [
-          { id: "observacoes", rotulo: "Observações", tipo: "textoLongo" }
+          { id: "observacoes", rotulo: "Observações", tipo: "textoLongo", semValor: "Sem observação" }
         ]}
       ],
       anexos: [
-        { id: "fatura", rotulo: "Fatura, recibo ou nota" }
+        { id: "fatura", rotulo: "Fatura, recibo ou nota", semValor: "Não tem / Não recebi" }
       ]
     }
   ]
