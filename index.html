@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelos de lançamento</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+<header class="topo">
+  <div class="topo-in">
+    <div>
+      <div class="eyebrow claro">Ferramentas DBVO</div>
+      <h1>Modelos de lançamento</h1>
+      <p class="sub">Gere o documento para anexar no UAU em poucos minutos.</p>
+    </div>
+    <label class="btn btn-claro" id="btnImportar">
+      Importar PDF para editar
+      <input type="file" accept="application/pdf,.pdf" id="inpImportar" hidden>
+    </label>
+  </div>
+  <div class="chevrons" aria-hidden="true"></div>
+</header>
+
+<main id="app" class="conteudo"></main>
+
+<div id="aviso" class="aviso" role="status" aria-live="polite" hidden></div>
+
+<script src="lib/pdf-lib.min.js"></script>
+<script src="lib/fontkit.umd.min.js"></script>
+<script src="modelos.js"></script>
+<script src="banco.js"></script>
+<script src="pdf.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
