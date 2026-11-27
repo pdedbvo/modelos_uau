@@ -180,16 +180,44 @@
     return false;
   }
 
+  function empresaAtual() { return C.empresas.find((e) => e.sufixo === estado.empresa); }
+  function rotuloEmpresa(e) { return (e.codigo ? e.codigo + " · " : "") + e.nome + " (final " + e.sufixo + ")"; }
+  function centrosDa(empresa) {
+    if (!empresa) return [];
+    const base = C.centrosDeCusto.filter((c) => !(empresa.sem || []).includes(c.prefixo)).map((c) => ({ ...c, cod: c.prefixo + empresa.sufixo }));
+    return base.concat((empresa.extras || []).map((x) => ({ ...x, cod: x.codigo })));
+  }
+  function abrirOutras() {
+    const fechar = () => fundo.remove();
+    const lista = el("div", { class: "lista-outras" });
+    const busca = el("input", { type: "text", placeholder: "Buscar empresa ou final…", oninput: () => desenhar() });
+    function desenhar() {
+      const q = busca.value.trim().toLowerCase();
+      lista.innerHTML = "";
+      C.empresas.filter((e) => !e.principal && (!q || rotuloEmpresa(e).toLowerCase().includes(q))).forEach((e) =>
+        lista.append(el("button", { type: "button", class: "item-outra", onclick: () => { estado.empresa = e.sufixo; estado.cc = ""; fechar(); render(); } }, rotuloEmpresa(e))));
+      if (!lista.children.length) lista.append(el("p", { class: "dica" }, "Nenhuma empresa encontrada."));
+    }
+    const fundo = el("div", { class: "modal-fundo", onclick: (e) => { if (e.target === fundo) fechar(); } },
+      el("div", { class: "modal", role: "dialog", "aria-label": "Outras empresas" },
+        el("div", { class: "modal-topo" }, el("h2", {}, "Outras empresas"), el("button", { class: "x", type: "button", "aria-label": "Fechar", onclick: fechar }, "×")),
+        el("p", { class: "dica" }, "Empresas que ainda não usamos no dia a dia."), busca, lista));
+    document.body.append(fundo); desenhar(); busca.focus();
+  }
+
   function passoIdentificacao(m) {
-    const empresa = C.empresas.find((e) => e.codigo === estado.empresa);
-    const ccs = empresa ? C.centrosDeCusto.map((c) => ({ cod: c.prefixo + empresa.sufixo, ...c })) : [];
-    const ccSel = C.centrosDeCusto.find((c) => empresa && c.prefixo + empresa.sufixo === estado.cc);
+    const empresa = empresaAtual();
+    const ccs = centrosDa(empresa);
+    const ccSel = ccs.find((c) => c.cod === estado.cc);
     const sug = ccSel && ccSel.sugerir && ccSel.sugerir !== m.id ? C.modelos.find((x) => x.id === ccSel.sugerir) : null;
 
     const grade = el("div", { class: "grade" },
-      campoBox({ id: "empresa", rotulo: "Empresa", meia: true }, el("select", { onchange: (e) => { estado.empresa = e.target.value; estado.cc = ""; render(); } },
+      campoBox({ id: "empresa", rotulo: "Empresa", meia: true }, el("select", { onchange: (e) => {
+          if (e.target.value === "__outras") { e.target.value = estado.empresa; abrirOutras(); return; }
+          estado.empresa = e.target.value; estado.cc = ""; render(); } },
         el("option", { value: "" }, "Escolha…"),
-        C.empresas.map((e) => el("option", { value: e.codigo, selected: e.codigo === estado.empresa }, e.codigo + " · " + e.nome))), "empresa"),
+        C.empresas.filter((e) => e.principal || e.sufixo === estado.empresa).map((e) => el("option", { value: e.sufixo, selected: e.sufixo === estado.empresa }, rotuloEmpresa(e))),
+        el("option", { value: "__outras" }, "Outras empresas…")), "empresa"),
       campoBox({ id: "cc", rotulo: "Centro de custo", uau: "Obra", meia: true }, el("select", { disabled: !empresa, onchange: (e) => { estado.cc = e.target.value; render(); } },
         el("option", { value: "" }, empresa ? "Escolha…" : "Escolha a empresa primeiro"),
         ccs.map((c) => el("option", { value: c.cod, selected: c.cod === estado.cc }, c.cod + " · " + c.nome))), "cc"),
@@ -480,8 +508,8 @@
   }
 
   function montarDados(m) {
-    const empresa = C.empresas.find((e) => e.codigo === estado.empresa);
-    const ccCfg = empresa && C.centrosDeCusto.find((c) => c.prefixo + empresa.sufixo === estado.cc);
+    const empresa = empresaAtual();
+    const ccCfg = centrosDa(empresa).find((c) => c.cod === estado.cc);
     const pend = pendencias().map((p) => ({ rotulo: p.rotulo, secao: p.secao, justificativa: estado.just[p.chave], anexo: !!p.anexo, chave: p.chave }));
     const fmtVal = (c, v) => {
       if (c.tipo === "calculado") return formatarCalc(c, calcular(c));
@@ -492,7 +520,7 @@
     };
     const secoes = [];
     secoes.push({ titulo: "Identificação", campos: [
-      { rotulo: "Empresa", valor: empresa ? empresa.codigo + " · " + empresa.nome : "", meia: true },
+      { rotulo: "Empresa", valor: empresa ? (empresa.codigo ? empresa.codigo + " · " : "") + empresa.nome : "", meia: true },
       { rotulo: "Centro de custo (obra UAU)", valor: ccCfg ? estado.cc + " · " + ccCfg.nome : "", meia: true },
       ...C.cabecalho.map((c) => ({ rotulo: c.rotulo, valor: fmtVal(c, estado.valores[c.id]), meia: c.meia }))
     ]});
