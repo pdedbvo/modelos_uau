@@ -27,14 +27,15 @@ window.CONFIG = {
   /* ---------- Empresas e centros de custo ---------- */
   /* Cada empresa tem um final (sufixo). O centro de custo é prefixo + sufixo, ex.: ADM09. */
   /* "principal: true" aparece direto na lista. As outras ficam no botão "Outras empresas".
-     "extras" acrescenta centros de custo que só existem naquela empresa; "sem" tira os que ela não tem. */
+     "extras" acrescenta centros de custo que só existem naquela empresa; "sem" tira os que ela não tem.
+     "arquivo" é o começo do nome do PDF (BE01 Garden/Kaa, BE02 Deodoro, BE03 Bonifácio, BE06 São Paulo, BE09 Dumont). */
   empresas: [
-    { codigo: "19", nome: "BE T09 Empreendimento Imobiliário SCP", sufixo: "09", principal: true },
-    { codigo: "6", nome: "BE T06 Empreendimento Imobiliário SCP", sufixo: "06", principal: true },
-    { codigo: "2", nome: "BE Deodoro Empreendimento Imobiliário Ltda", sufixo: "02", principal: true },
-    { codigo: "275", nome: "BE Kaa Square Empreendimento Imobiliário Ltda", sufixo: "BK", principal: true, sem: ["PDV"],
+    { codigo: "19", nome: "BE T09 Empreendimento Imobiliário SCP", sufixo: "09", arquivo: "BE09", principal: true },
+    { codigo: "6", nome: "BE T06 Empreendimento Imobiliário SCP", sufixo: "06", arquivo: "BE06", principal: true },
+    { codigo: "2", nome: "BE Deodoro Empreendimento Imobiliário Ltda", sufixo: "02", arquivo: "BE02", principal: true },
+    { codigo: "275", nome: "BE Kaa Square Empreendimento Imobiliário Ltda", sufixo: "BK", arquivo: "BE01", principal: true, sem: ["PDV"],
       extras: [{ prefixo: "DIS", codigo: "DISBR", nome: "Distribuição de lucro - SPE", sugerir: "nao-se-enquadra" }] },
-    { codigo: "289", nome: "BE Bonifácio Empreendimento Imobiliário Ltda", sufixo: "BO", principal: true, sem: ["PDV"] },
+    { codigo: "289", nome: "BE Bonifácio Empreendimento Imobiliário Ltda", sufixo: "BO", arquivo: "BE03", principal: true, sem: ["PDV"] },
     { codigo: "", nome: "Empresa final 01", sufixo: "01" },
     { codigo: "", nome: "Empresa final 03", sufixo: "03" },
     { codigo: "", nome: "Empresa final 04", sufixo: "04" },

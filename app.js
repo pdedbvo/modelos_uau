@@ -612,12 +612,12 @@
   }
 
   /* Nome do arquivo: <empresa>-<números do UAU>-<FORNECEDOR>-<MMAAAA>; espaço vira "_".
-     Empresa: BE + final (BE06); BK e BO usam só o final. */
+     Empresa: campo "arquivo" da empresa (BE01, BE02...). */
   function nomeArquivo(m) {
     const v = estado.valores, emp = empresaAtual();
     const limpa = (t) => String(t || "").trim().replace(/[\\/:*?"<>|#%]+/g, "").replace(/\s+/g, "_");
     const suf = emp ? String(emp.sufixo || "") : "";
-    const prefixo = suf ? (/^\d+$/.test(suf) ? "BE" + suf : suf) : "BE";
+    const prefixo = emp && emp.arquivo ? emp.arquivo : suf ? "BE" + suf : "BE";
     const hoje = new Date().toISOString().slice(0, 10);
     let nums, data;
     if (m.id === "medicao") { nums = ["CT" + limpa(v.numContrato), "MED" + limpa(v.numMedicao)]; data = v.periodoFim || v.periodoInicio; }
