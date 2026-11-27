@@ -179,3 +179,10 @@ table.tab td .calc { min-height: 35px; padding: 7px 8px; text-align: right; }
 .lista-outras { overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
 .item-outra { text-align: left; background: var(--bloco); border: none; border-radius: 10px; padding: 10px 12px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .item-outra:hover { background: var(--preto); color: var(--branco); }
+
+/* data: digitar ou abrir o calendário */
+.data { position: relative; display: flex; align-items: stretch; min-width: 0; }
+.data input[type=text] { padding-right: 44px; }
+.data-bt { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); border: 0; background: none; cursor: pointer; font-size: 16px; padding: 6px 8px; border-radius: 8px; line-height: 1; filter: grayscale(1); }
+.data-bt:hover { background: var(--bloco); }
+.data-cal { position: absolute; right: 0; bottom: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; border: 0; padding: 0; }

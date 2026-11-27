@@ -267,6 +267,29 @@
       el("textarea", { rows: 2, "data-k": "j:" + chave, oninput: (e) => { estado.just[chave] = e.target.value; atualizarBarra(e.target.closest(".just")); } }, estado.just[chave] || ""));
   }
 
+  /* ---------------- data: digitar dd/mm/aaaa ou abrir o calendário ---------------- */
+  function isoParaBr(v) { return /^\d{4}-\d{2}-\d{2}$/.test(v || "") ? v.split("-").reverse().join("/") : ""; }
+  function brParaIso(t) {
+    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(t || "");
+    if (!m) return "";
+    const d = new Date(+m[3], +m[2] - 1, +m[1]);
+    return d.getDate() === +m[1] && d.getMonth() === +m[2] - 1 ? m[3] + "-" + m[2] + "-" + m[1] : "";
+  }
+  function mascaraData(t) {
+    const d = t.replace(/\D/g, "").slice(0, 8);
+    return d.length > 4 ? d.slice(0, 2) + "/" + d.slice(2, 4) + "/" + d.slice(4) : d.length > 2 ? d.slice(0, 2) + "/" + d.slice(2) : d;
+  }
+  function campoData(valor, set, extra) {
+    const cal = el("input", { type: "date", class: "data-cal", tabindex: "-1", "aria-hidden": "true", value: valor || "",
+      onchange: (e) => { set(e.target.value); renderDepois(); } });
+    const txt = el("input", Object.assign({ type: "text", inputmode: "numeric", placeholder: "dd/mm/aaaa", maxlength: 10, autocomplete: "off", value: isoParaBr(valor),
+      oninput: (e) => { const t = mascaraData(e.target.value); e.target.value = t; set(brParaIso(t)); },
+      onblur: (e) => { if (e.target.value && !brParaIso(e.target.value)) { aviso("Data incompleta ou inválida. Use dd/mm/aaaa, ex.: 05/11/2026."); } renderDepois(); } }, extra || {}));
+    const bt = el("button", { type: "button", class: "data-bt", "aria-label": "Abrir calendário",
+      onclick: () => { try { cal.showPicker(); } catch (e) { cal.focus(); cal.click(); } } }, "📅");
+    return el("div", { class: "data" }, txt, bt, cal);
+  }
+
   function campo(c, kv) {
     const v = estado.valores[c.id];
     const set = (val) => { estado.valores[c.id] = val; };
@@ -275,7 +298,7 @@
       case "textoLongo":
         ctl = el("textarea", { rows: 3, oninput: (e) => { set(e.target.value); recalcular(); }, onblur: () => { if (estado.tentou) renderDepois(); } }, v || ""); break;
       case "data":
-        ctl = el("input", { type: "date", value: v || "", onchange: (e) => { set(e.target.value); renderDepois(); } }); break;
+        ctl = campoData(v, set, { "data-k": c.id }); break;
       case "moeda":
         ctl = el("input", { type: "text", inputmode: "decimal", placeholder: "0,00", value: v || "",
           oninput: (e) => { set(e.target.value); recalcular(); },
@@ -294,7 +317,7 @@
           oninput: (e) => { set(e.target.value); },
           onblur: () => { if (c.id === "numContrato" || c.id === "numMedicao") preencherPorContrato(); if (c.id === "fornecedor") preencherPorFornecedor(); renderDepois(); } });
     }
-    if (ctl.setAttribute) ctl.setAttribute("data-k", c.id);
+    if (ctl.setAttribute && !ctl.classList.contains("data")) ctl.setAttribute("data-k", c.id);
     return campoBox(c, ctl, c.tipo === "calculado" && !c.justificarSe ? null : c.id);
   }
 
@@ -356,6 +379,7 @@
       chaveMin ? justificativa(chaveMin, c.perguntaMinimo) : null);
   }
   function celula(c, k, l, i) {
+    if (k.tipo === "data") return campoData(l[k.id], (val) => { l[k.id] = val; }, { "data-k": c.id + "." + i + "." + k.id, "aria-label": k.rotulo });
     if (k.tipo === "calculado") return el("div", { class: "calc", "data-calc": c.id + "." + i + "." + k.id }, formatarCalc(k, calcular(k, l)));
     const tipo = k.tipo === "data" ? "date" : "text";
     return el("input", { "data-k": c.id + "." + i + "." + k.id, type: tipo, value: l[k.id] || "", list: listaDe(k.id), autocomplete: listaDe(k.id) ? "off" : null, inputmode: ["moeda", "numero"].includes(k.tipo) ? "decimal" : null,
