@@ -181,7 +181,7 @@
   }
 
   function empresaAtual() { return C.empresas.find((e) => e.sufixo === estado.empresa); }
-  function rotuloEmpresa(e) { return (e.codigo ? e.codigo + " · " : "") + e.nome + " (final " + e.sufixo + ")"; }
+  function rotuloEmpresa(e) { return (e.codigo ? e.codigo + " · " : "") + e.nome; }
   function centrosDa(empresa) {
     if (!empresa) return [];
     const base = C.centrosDeCusto.filter((c) => !(empresa.sem || []).includes(c.prefixo)).map((c) => ({ ...c, cod: c.prefixo + empresa.sufixo }));
