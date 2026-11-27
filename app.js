@@ -249,7 +249,8 @@
   }
 
   function passoFormulario(m) {
-    const sec = el("section", { class: "passo" }, el("div", { class: "eyebrow" }, "Passo 3"), el("h2", {}, m.titulo));
+    const sec = el("section", { class: "passo" }, el("div", { class: "eyebrow" }, "Passo 3"), el("h2", {}, m.titulo),
+      el("p", { class: "dica-form" }, "Com o UAU aberto, copie e cole os campos direto de lá. O nome no UAU aparece ao lado de cada campo."));
     let i = 0;
     while (i < m.secoes.length) {
       const s = m.secoes[i], prox = m.secoes[i + 1];

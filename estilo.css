@@ -198,3 +198,8 @@ table.tab td .calc { min-height: 35px; padding: 7px 8px; text-align: right; }
 .sem.on { color: var(--preto); font-weight: 700; }
 .dispensada input:not([type=checkbox]), .dispensada textarea, .dispensada select, .dispensada .data-bt, .grade.dispensada .campo { opacity: .4; pointer-events: none; }
 .slot-acoes { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+.dica-uau { margin-top: 12px; display: flex; gap: 14px; align-items: center; padding: 14px 18px; border-radius: var(--raio); background: var(--bloco); font-size: 14px; line-height: 1.5; }
+.dica-uau b { flex: none; background: var(--preto); color: var(--branco); border-radius: 99px; padding: 4px 12px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+.dica-form { margin: -8px 0 16px; color: var(--cinza); font-size: 14px; }
+@media (max-width: 560px) { .dica-uau { flex-direction: column; align-items: flex-start; } }
