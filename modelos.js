@@ -189,19 +189,20 @@ window.CONFIG = {
               { id: "total", rotulo: "Valor total", tipo: "moeda", largura: 1.3 },
               { id: "frete", rotulo: "Frete", tipo: "moeda", largura: 1 },
               { id: "condicao", rotulo: "Cond. pagamento", tipo: "texto", largura: 1.4 },
-              { id: "prazo", rotulo: "Prazo entrega", tipo: "texto", largura: 1.1 },
-              { id: "validade", rotulo: "Validade", tipo: "data", largura: 1.1 }
+              { id: "prazo", rotulo: "Prazo entrega", tipo: "texto", largura: 1.1 }
             ]},
           { id: "melhorPreco", rotulo: "Menor valor (total + frete)", tipo: "calculado", formato: "texto",
             calculo: (v) => melhorProposta(v.propostas) }
         ]},
         { titulo: "Decisão", campos: [
-          { id: "escolhido", rotulo: "Fornecedor escolhido", tipo: "texto", uau: "Confirmar Cotação", meia: true },
+          { id: "escolhido", rotulo: "Fornecedor escolhido", tipo: "opcaoDe", fonte: "propostas", campo: "fornecedor", uau: "Confirmar Cotação", meia: true },
           { id: "motivo", rotulo: "Motivo da escolha", tipo: "opcao", meia: true,
             opcoes: ["Menor preço", "Melhor prazo", "Qualidade técnica", "Fornecedor único", "Outro"] },
-          { id: "motivoDetalhe", rotulo: "Detalhe do motivo", tipo: "textoLongo" },
-          { id: "condicaoFinal", rotulo: "Condição de pagamento acordada", tipo: "texto", uau: "Fechamento de compra", meia: true },
-          { id: "entregaFinal", rotulo: "Data de entrega acordada", tipo: "data", meia: true }
+          { id: "motivoDetalhe", rotulo: "Detalhe do motivo", tipo: "textoLongo", semValor: "Não há motivos adicionais" },
+          { id: "condicaoFinal", rotulo: "Condição de pagamento acordada", tipo: "calculado", formato: "texto", uau: "Fechamento de compra", meia: true,
+            dica: "Vem da proposta do fornecedor escolhido.", calculo: (v) => propostaEscolhida(v).condicao || null },
+          { id: "entregaFinal", rotulo: "Prazo de entrega acordado", tipo: "calculado", formato: "texto", meia: true,
+            dica: "Vem da proposta do fornecedor escolhido.", calculo: (v) => propostaEscolhida(v).prazo || null }
         ]},
         { titulo: "Observações", campos: [
           { id: "observacoes", rotulo: "Observações", tipo: "textoLongo", semValor: "Sem observação" }
@@ -397,6 +398,10 @@ function num(v) {
 function linhasTabela(l) { return l || []; }
 function somaTabela(linhas, coluna) {
   return (linhas || []).reduce((t, l) => t + num(l[coluna]), 0);
+}
+function propostaEscolhida(v) {
+  const nome = String(v.escolhido || "").trim();
+  return (v.propostas || []).find((l) => String(l.fornecedor || "").trim() === nome) || {};
 }
 function melhorProposta(linhas) {
   const validas = (linhas || []).filter((l) => l.fornecedor && num(l.total));

@@ -336,6 +336,12 @@
       case "opcao":
         ctl = el("select", { onchange: (e) => { set(e.target.value); render(); } }, el("option", { value: "" }, "Escolha…"),
           c.opcoes.map((o) => el("option", { value: o, selected: o === v }, o))); break;
+      case "opcaoDe": {
+        const nomes = [...new Set(linhasPreenchidas(c.fonte).map((x) => String(x[c.campo] || "").trim()).filter(Boolean))];
+        const opts = [el("option", { value: "" }, nomes.length ? "Escolha…" : "Preencha a tabela acima")].concat(nomes.map((o) => el("option", { value: o, selected: o === v ? true : null }, o)));
+        if (v && !nomes.includes(v)) opts.push(el("option", { value: v, selected: true }, v + " (não está mais na lista)"));
+        ctl = el("select", { onchange: (e) => { set(e.target.value); render(); } }, opts); break;
+      }
       case "calculado":
         ctl = el("div", { class: "calc" + (c.destaque ? " destaque" : ""), "data-calc": c.id }, formatarCalc(c, calcular(c))); break;
       case "tabela":
