@@ -610,16 +610,22 @@
     };
   }
 
-  /* Nome do arquivo. Medição: BE06-CT<nº>-MED<nº>-<FORNECEDOR>-<MESANO>; espaço vira "_". */
+  /* Nome do arquivo: <empresa>-<números do UAU>-<FORNECEDOR>-<MMAAAA>; espaço vira "_".
+     Empresa: BE + final (BE06); BK e BO usam só o final. */
   function nomeArquivo(m) {
-    if (m.id !== "medicao") return "";
     const v = estado.valores, emp = empresaAtual();
     const limpa = (t) => String(t || "").trim().replace(/[\\/:*?"<>|#%]+/g, "").replace(/\s+/g, "_");
     const suf = emp ? String(emp.sufixo || "") : "";
     const prefixo = suf ? (/^\d+$/.test(suf) ? "BE" + suf : suf) : "BE";
-    const data = v.periodoFim || v.periodoInicio || new Date().toISOString().slice(0, 10);
-    const mesAno = data.slice(5, 7) + data.slice(0, 4);
-    return [prefixo, "CT" + limpa(v.numContrato), "MED" + limpa(v.numMedicao), limpa(v.fornecedor), mesAno].join("-");
+    const hoje = new Date().toISOString().slice(0, 10);
+    let nums, data;
+    if (m.id === "medicao") { nums = ["CT" + limpa(v.numContrato), "MED" + limpa(v.numMedicao)]; data = v.periodoFim || v.periodoInicio; }
+    else if (m.id === "aditivo") { nums = ["CT" + limpa(v.numContrato), "ADT" + limpa(v.numAditivo)]; data = null; }
+    else if (m.id === "cotacao") { nums = ["COT" + limpa(v.numCotacao)]; data = null; }
+    else if (m.id === "contrato") { nums = ["CT" + limpa(v.numContrato)]; data = v.vigenciaInicio; }
+    else { nums = ["NSE" + limpa(v.numProcesso)]; data = v.vencimento; }
+    data = data || hoje;
+    return [prefixo, ...nums, limpa(v.fornecedor), data.slice(5, 7) + data.slice(0, 4)].filter(Boolean).join("-");
   }
   function baixar(bytes, nome) {
     const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
