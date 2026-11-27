@@ -48,6 +48,9 @@ a { color: inherit; text-decoration: none; }
 
 /* seções */
 section.bl { margin-top: 40px; }
+.conteudo { padding: 0 0 120px; }
+.passo { margin-top: 64px; scroll-margin-top: 70px; }
+.passo + .passo { margin-top: 48px; }
 .eyebrow { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--cinza); display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .eyebrow::before { content: ""; width: 22px; height: 2px; background: var(--preto); flex: none; }
 .eyebrow.claro { color: var(--claro); }
