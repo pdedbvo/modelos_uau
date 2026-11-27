@@ -186,3 +186,12 @@ table.tab td .calc { min-height: 35px; padding: 7px 8px; text-align: right; }
 .data-bt { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); border: 0; background: none; cursor: pointer; font-size: 16px; padding: 6px 8px; border-radius: 8px; line-height: 1; filter: grayscale(1); }
 .data-bt:hover { background: var(--bloco); }
 .data-cal { position: absolute; right: 0; bottom: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; border: 0; padding: 0; }
+
+/* "não tem / sem observação" */
+.bloco-topo { display: flex; justify-content: space-between; align-items: center; gap: 10px 16px; flex-wrap: wrap; margin-bottom: 12px; }
+.bloco-topo h2 { margin: 0; }
+.sem { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--cinza); cursor: pointer; user-select: none; margin-top: 2px; width: fit-content; max-width: 100%; }
+.sem input { width: 16px; height: 16px; accent-color: var(--preto); margin: 0; flex: none; cursor: pointer; }
+.sem.on { color: var(--preto); font-weight: 700; }
+.dispensada input:not([type=checkbox]), .dispensada textarea, .dispensada select, .dispensada .data-bt, .grade.dispensada .campo { opacity: .4; pointer-events: none; }
+.slot-acoes { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }

@@ -44,8 +44,21 @@
   /* ---------------- campos visíveis e pendências ---------------- */
   function camposDoModelo(m) {
     const lista = C.cabecalho.map((c) => ({ ...c, secao: "Identificação" }));
-    for (const s of m.secoes) for (const c of s.campos) lista.push({ ...c, secao: s.titulo });
+    for (const s of m.secoes) for (const c of s.campos) lista.push({ ...c, secao: s.titulo, semSecao: s.semValor ? "sec:" + s.titulo : null, semSecaoRotulo: s.semValor });
     return lista;
+  }
+  /* "Não tem / sem observação": marcado, o campo não pede justificativa */
+  const marcado = (chave) => !!estado.valores["__sem:" + chave];
+  function dispensado(c) { return marcado(c.id) || (c.semSecao ? marcado(c.semSecao) : false); }
+  function anexoDispensado(m, a) {
+    if (marcado("anexo:" + a.id)) return true;
+    return m.secoes.some((s) => s.semValor && (s.semAnexos || []).includes(a.id) && marcado("sec:" + s.titulo));
+  }
+  function caixaSem(chave, rotulo) {
+    return el("label", { class: "sem" + (marcado(chave) ? " on" : "") },
+      el("input", { type: "checkbox", checked: marcado(chave) ? true : null,
+        onchange: (e) => { if (e.target.checked) estado.valores["__sem:" + chave] = true; else delete estado.valores["__sem:" + chave]; renderDepois(); } }),
+      el("span", {}, rotulo));
   }
   function visivel(c) {
     if (!c.soSe) return true;
@@ -65,6 +78,7 @@
     if (vazio(estado.cc)) out.push({ chave: "cc", rotulo: "Centro de custo", secao: "Identificação" });
     for (const c of camposDoModelo(m)) {
       if (!visivel(c)) continue;
+      if (dispensado(c)) continue;
       if (c.tipo === "calculado") {
         if (c.justificarSe) { const r = calcular(c); if (r !== null && c.justificarSe(r)) out.push({ chave: c.id, rotulo: c.pergunta || c.rotulo, secao: c.secao, pergunta: c.pergunta }); }
         continue;
@@ -76,7 +90,7 @@
       } else if (vazio(estado.valores[c.id])) out.push({ chave: c.id, rotulo: c.rotulo, secao: c.secao });
     }
     for (const a of m.anexos) {
-      if (!(estado.anexos[a.id] || []).length) out.push({ chave: "anexo:" + a.id, rotulo: a.rotulo, secao: "Comprovantes", anexo: true });
+      if (!(estado.anexos[a.id] || []).length && !anexoDispensado(m, a)) out.push({ chave: "anexo:" + a.id, rotulo: a.rotulo, secao: "Comprovantes", anexo: true });
     }
     return out;
   }
@@ -245,8 +259,17 @@
     return sec;
   }
   function blocoSecao(s) {
-    return el("div", { class: "bloco" }, el("h2", {}, s.titulo),
-      el("div", { class: "grade" }, s.campos.filter(visivel).map((c) => campo(c, s.meia))));
+    const secOff = s.semValor && marcado("sec:" + s.titulo);
+    return el("div", { class: "bloco" },
+      el("div", { class: "bloco-topo" }, el("h2", {}, s.titulo), s.semValor ? caixaSem("sec:" + s.titulo, s.semValor) : null),
+      el("div", { class: "grade" + (secOff ? " dispensada" : "") }, s.campos.filter(visivel).map((c) => {
+        const box = campo(c, s.meia);
+        if (c.semValor && box && box.append) {
+          if (marcado(c.id)) box.classList.add("dispensada");
+          box.append(caixaSem(c.id, c.semValor));
+        }
+        return box;
+      })));
   }
 
   function campoBox(c, controle, chaveJust) {
@@ -404,7 +427,10 @@
           return el("div", { class: "slot" },
             el("div", { class: "slot-topo" },
               el("span", { class: "slot-t" }, s.rotulo),
-              el("label", { class: "btn btn-borda btn-pequeno" }, "+ Anexar", inp)),
+              el("div", { class: "slot-acoes" },
+                s.semValor ? caixaSem("anexo:" + s.id, s.semValor) : null,
+                el("label", { class: "btn btn-borda btn-pequeno" }, "+ Anexar", inp))),
+            !lista.length && !marcado("anexo:" + s.id) && anexoDispensado(modelo(), s) ? el("div", { class: "dica" }, "Marcado como sem nota fiscal na seção Nota fiscal.") : null,
             lista.length ? el("ul", { class: "arquivos" }, lista.map((a, i) => el("li", {},
               el("span", { class: "nome", title: a.nome }, a.nome),
               el("span", { class: "meta" }, (a.paginas > 1 ? a.paginas + " páginas · " : "") + (a.importado ? "do PDF importado" : tamanho(a.bytes.length))),
@@ -509,7 +535,7 @@
       if (!estado.codigo) estado.codigo = novoCodigo(m);
       const dados = montarDados(m);
       const bytes = await window.gerarPDF(dados, estado.anexos, estado.importado);
-      const nome = estado.codigo + (estado.versao > 1 ? "-v" + estado.versao : "") + ".pdf";
+      const nome = (nomeArquivo(m) || estado.codigo) + (estado.versao > 1 ? "-v" + estado.versao : "") + ".pdf";
       baixar(bytes, nome);
       try {
         const calc = (id) => { const c = camposDoModelo(m).find((x) => x.id === id); return c ? calcular(c) : null; };
@@ -537,6 +563,7 @@
     const ccCfg = centrosDa(empresa).find((c) => c.cod === estado.cc);
     const pend = pendencias().map((p) => ({ rotulo: p.rotulo, secao: p.secao, justificativa: estado.just[p.chave], anexo: !!p.anexo, chave: p.chave }));
     const fmtVal = (c, v) => {
+      if (marcado(c.id)) return c.semValor;
       if (c.tipo === "calculado") return formatarCalc(c, calcular(c));
       if (vazio(v)) return "";
       if (c.tipo === "data") return v.split("-").reverse().join("/");
@@ -551,6 +578,7 @@
     ]});
     for (const s of m.secoes) {
       const campos = [];
+      if (s.semValor && marcado("sec:" + s.titulo)) { secoes.push({ titulo: s.titulo, meia: s.meia, campos: [{ rotulo: s.titulo, valor: s.semValor }] }); continue; }
       for (const c of s.campos) {
         if (!visivel(c)) continue;
         if (c.tipo === "tabela") {
@@ -575,11 +603,24 @@
       codigo: estado.codigo, versao: estado.versao, geradoEm: new Date().toISOString(),
       modelo: { id: m.id, titulo: m.titulo, nome: m.nome },
       anexosCfg: [...m.anexos, { id: "outros", rotulo: "Outros comprovantes" }],
+      anexosSem: m.anexos.filter((a) => !(estado.anexos[a.id] || []).length && anexoDispensado(m, a)).map((a) => ({ rotulo: a.rotulo,
+        motivo: marcado("anexo:" + a.id) ? a.semValor : (m.secoes.find((s) => (s.semAnexos || []).includes(a.id) && marcado("sec:" + s.titulo)) || {}).semValor })),
       pendencias: pend, secoes,
       bruto: { modeloId: m.id, empresa: estado.empresa, cc: estado.cc, valores: estado.valores, just: estado.just }
     };
   }
 
+  /* Nome do arquivo. Medição: BE06-CT<nº>-MED<nº>-<FORNECEDOR>-<MESANO>; espaço vira "_". */
+  function nomeArquivo(m) {
+    if (m.id !== "medicao") return "";
+    const v = estado.valores, emp = empresaAtual();
+    const limpa = (t) => String(t || "").trim().replace(/[\\/:*?"<>|#%]+/g, "").replace(/\s+/g, "_");
+    const suf = emp ? String(emp.sufixo || "") : "";
+    const prefixo = suf ? (/^\d+$/.test(suf) ? "BE" + suf : suf) : "BE";
+    const data = v.periodoFim || v.periodoInicio || new Date().toISOString().slice(0, 10);
+    const mesAno = data.slice(5, 7) + data.slice(0, 4);
+    return [prefixo, "CT" + limpa(v.numContrato), "MED" + limpa(v.numMedicao), limpa(v.fornecedor), mesAno].join("-");
+  }
   function baixar(bytes, nome) {
     const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
     const a = el("a", { href: url, download: nome }); document.body.append(a); a.click(); a.remove();
