@@ -62,7 +62,8 @@
   }
   function visivel(c) {
     if (!c.soSe) return true;
-    return estado.valores[c.soSe.campo] === c.soSe.valor;
+    const atual = estado.valores[c.soSe.campo];
+    return c.soSe.valores ? c.soSe.valores.includes(atual) : atual === c.soSe.valor;
   }
   function linhasPreenchidas(id) {
     const m = modelo();
@@ -94,6 +95,7 @@
     }
     return out;
   }
+  function travas() { const m = modelo(); materializar(); return m && m.travas ? m.travas(estado.valores) : []; }
   function faltando() { return pendencias().filter((p) => vazio(estado.just[p.chave])); }
 
   /* ---------------- render ---------------- */
@@ -249,13 +251,16 @@
   }
 
   function passoFormulario(m) {
-    const sec = el("section", { class: "passo" }, el("div", { class: "eyebrow" }, "Passo 3"), el("h2", {}, m.titulo));
+    const sec = el("section", { class: "passo" }, el("div", { class: "eyebrow" }, "Passo 3"), el("h2", {}, m.titulo),
+      el("p", { class: "dica-form" }, "Com o UAU aberto, copie e cole os campos direto de lá. O nome no UAU aparece ao lado de cada campo."));
     let i = 0;
     while (i < m.secoes.length) {
       const s = m.secoes[i], prox = m.secoes[i + 1];
       if (s.meia && prox && prox.meia) { sec.append(el("div", { class: "duas" }, blocoSecao(s), blocoSecao(prox))); i += 2; }
       else { sec.append(blocoSecao(s)); i++; }
     }
+    const tr = travas();
+    if (tr.length) sec.append(el("div", { class: "travas" }, el("b", {}, "Para gerar o PDF, ainda falta fechar:"), el("ul", {}, tr.map((t) => el("li", {}, t)))));
     return sec;
   }
   function blocoSecao(s) {
@@ -331,6 +336,12 @@
       case "opcao":
         ctl = el("select", { onchange: (e) => { set(e.target.value); render(); } }, el("option", { value: "" }, "Escolha…"),
           c.opcoes.map((o) => el("option", { value: o, selected: o === v }, o))); break;
+      case "opcaoDe": {
+        const nomes = [...new Set(linhasPreenchidas(c.fonte).map((x) => String(x[c.campo] || "").trim()).filter(Boolean))];
+        const opts = [el("option", { value: "" }, nomes.length ? "Escolha…" : "Preencha a tabela acima")].concat(nomes.map((o) => el("option", { value: o, selected: o === v ? true : null }, o)));
+        if (v && !nomes.includes(v)) opts.push(el("option", { value: v, selected: true }, v + " (não está mais na lista)"));
+        ctl = el("select", { onchange: (e) => { set(e.target.value); render(); } }, opts); break;
+      }
       case "calculado":
         ctl = el("div", { class: "calc" + (c.destaque ? " destaque" : ""), "data-calc": c.id }, formatarCalc(c, calcular(c))); break;
       case "tabela":
@@ -402,6 +413,14 @@
       chaveMin ? justificativa(chaveMin, c.perguntaMinimo) : null);
   }
   function celula(c, k, l, i) {
+    if (k.tipo === "itemDe") {
+      const nomes = linhasPreenchidas(k.fonte).map((x, j) => String(x[k.campo] || "").trim() || "Item " + (j + 1));
+      const atual = l[k.id] || "";
+      const opts = [el("option", { value: "" }, nomes.length ? "Escolha o item…" : "Preencha os itens acima")]
+        .concat(nomes.map((n) => el("option", { value: n, selected: n === atual ? true : null }, n)));
+      if (atual && !nomes.includes(atual)) opts.push(el("option", { value: atual, selected: true }, atual + " (não está mais nos itens)"));
+      return el("select", { "data-k": c.id + "." + i + "." + k.id, "aria-label": k.rotulo, onchange: (e) => { l[k.id] = e.target.value; recalcular(); renderDepois(); } }, opts);
+    }
     if (k.tipo === "data") return campoData(l[k.id], (val) => { l[k.id] = val; }, { "data-k": c.id + "." + i + "." + k.id, "aria-label": k.rotulo });
     if (k.tipo === "calculado") return el("div", { class: "calc", "data-calc": c.id + "." + i + "." + k.id }, formatarCalc(k, calcular(k, l)));
     const tipo = k.tipo === "data" ? "date" : "text";
@@ -522,6 +541,8 @@
   async function gerar() {
     const m = modelo();
     estado.tentou = true;
+    const tr = travas();
+    if (tr.length) { render(); aviso(tr[0] + (tr.length > 1 ? " (e mais " + (tr.length - 1) + ")" : ""), true); return; }
     const f = faltando();
     if (f.length) {
       render();
@@ -611,19 +632,21 @@
   }
 
   /* Nome do arquivo: <empresa>-<números do UAU>-<FORNECEDOR>-<MMAAAA>; espaço vira "_".
-     Empresa: BE + final (BE06); BK e BO usam só o final. */
+     Empresa: campo "arquivo" da empresa (BE01, BE02...). */
   function nomeArquivo(m) {
     const v = estado.valores, emp = empresaAtual();
     const limpa = (t) => String(t || "").trim().replace(/[\\/:*?"<>|#%]+/g, "").replace(/\s+/g, "_");
     const suf = emp ? String(emp.sufixo || "") : "";
-    const prefixo = suf ? (/^\d+$/.test(suf) ? "BE" + suf : suf) : "BE";
+    const prefixo = emp && emp.arquivo ? emp.arquivo : suf ? "BE" + suf : "BE";
     const hoje = new Date().toISOString().slice(0, 10);
     let nums, data;
     if (m.id === "medicao") { nums = ["CT" + limpa(v.numContrato), "MED" + limpa(v.numMedicao)]; data = v.periodoFim || v.periodoInicio; }
     else if (m.id === "aditivo") { nums = ["CT" + limpa(v.numContrato), "ADT" + limpa(v.numAditivo)]; data = null; }
     else if (m.id === "cotacao") { nums = ["COT" + limpa(v.numCotacao)]; data = null; }
     else if (m.id === "contrato") { nums = ["CT" + limpa(v.numContrato)]; data = v.vigenciaInicio; }
-    else { nums = ["NSE" + limpa(v.numProcesso)]; data = v.vencimento; }
+    else if (v.origem === "Medição") { nums = ["CT" + limpa(v.numContrato), "MED" + limpa(v.numMedicao)]; data = v.vencimento; }
+    else if (v.origem === "Cotação") { nums = ["COT" + limpa(v.numCotacao)]; data = v.vencimento; }
+    else { nums = ["OUT" + limpa(v.numProcesso)]; data = v.vencimento; }
     data = data || hoje;
     return [prefixo, ...nums, limpa(v.fornecedor), data.slice(5, 7) + data.slice(0, 4)].filter(Boolean).join("-");
   }

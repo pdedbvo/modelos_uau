@@ -27,14 +27,15 @@ window.CONFIG = {
   /* ---------- Empresas e centros de custo ---------- */
   /* Cada empresa tem um final (sufixo). O centro de custo é prefixo + sufixo, ex.: ADM09. */
   /* "principal: true" aparece direto na lista. As outras ficam no botão "Outras empresas".
-     "extras" acrescenta centros de custo que só existem naquela empresa; "sem" tira os que ela não tem. */
+     "extras" acrescenta centros de custo que só existem naquela empresa; "sem" tira os que ela não tem.
+     "arquivo" é o começo do nome do PDF (BE01 Garden/Kaa, BE02 Deodoro, BE03 Bonifácio, BE06 São Paulo, BE09 Dumont). */
   empresas: [
-    { codigo: "19", nome: "BE T09 Empreendimento Imobiliário SCP", sufixo: "09", principal: true },
-    { codigo: "6", nome: "BE T06 Empreendimento Imobiliário SCP", sufixo: "06", principal: true },
-    { codigo: "2", nome: "BE Deodoro Empreendimento Imobiliário Ltda", sufixo: "02", principal: true },
-    { codigo: "275", nome: "BE Kaa Square Empreendimento Imobiliário Ltda", sufixo: "BK", principal: true, sem: ["PDV"],
+    { codigo: "19", nome: "BE T09 Empreendimento Imobiliário SCP", sufixo: "09", arquivo: "BE09", principal: true },
+    { codigo: "6", nome: "BE T06 Empreendimento Imobiliário SCP", sufixo: "06", arquivo: "BE06", principal: true },
+    { codigo: "2", nome: "BE Deodoro Empreendimento Imobiliário Ltda", sufixo: "02", arquivo: "BE02", principal: true },
+    { codigo: "275", nome: "BE Kaa Square Empreendimento Imobiliário Ltda", sufixo: "BK", arquivo: "BE01", principal: true, sem: ["PDV"],
       extras: [{ prefixo: "DIS", codigo: "DISBR", nome: "Distribuição de lucro - SPE", sugerir: "nao-se-enquadra" }] },
-    { codigo: "289", nome: "BE Bonifácio Empreendimento Imobiliário Ltda", sufixo: "BO", principal: true, sem: ["PDV"] },
+    { codigo: "289", nome: "BE Bonifácio Empreendimento Imobiliário Ltda", sufixo: "BO", arquivo: "BE03", principal: true, sem: ["PDV"] },
     { codigo: "", nome: "Empresa final 01", sufixo: "01" },
     { codigo: "", nome: "Empresa final 03", sufixo: "03" },
     { codigo: "", nome: "Empresa final 04", sufixo: "04" },
@@ -188,19 +189,20 @@ window.CONFIG = {
               { id: "total", rotulo: "Valor total", tipo: "moeda", largura: 1.3 },
               { id: "frete", rotulo: "Frete", tipo: "moeda", largura: 1 },
               { id: "condicao", rotulo: "Cond. pagamento", tipo: "texto", largura: 1.4 },
-              { id: "prazo", rotulo: "Prazo entrega", tipo: "texto", largura: 1.1 },
-              { id: "validade", rotulo: "Validade", tipo: "data", largura: 1.1 }
+              { id: "prazo", rotulo: "Prazo entrega", tipo: "texto", largura: 1.1 }
             ]},
           { id: "melhorPreco", rotulo: "Menor valor (total + frete)", tipo: "calculado", formato: "texto",
             calculo: (v) => melhorProposta(v.propostas) }
         ]},
         { titulo: "Decisão", campos: [
-          { id: "escolhido", rotulo: "Fornecedor escolhido", tipo: "texto", uau: "Confirmar Cotação", meia: true },
+          { id: "escolhido", rotulo: "Fornecedor escolhido", tipo: "opcaoDe", fonte: "propostas", campo: "fornecedor", uau: "Confirmar Cotação", meia: true },
           { id: "motivo", rotulo: "Motivo da escolha", tipo: "opcao", meia: true,
             opcoes: ["Menor preço", "Melhor prazo", "Qualidade técnica", "Fornecedor único", "Outro"] },
-          { id: "motivoDetalhe", rotulo: "Detalhe do motivo", tipo: "textoLongo" },
-          { id: "condicaoFinal", rotulo: "Condição de pagamento acordada", tipo: "texto", uau: "Fechamento de compra", meia: true },
-          { id: "entregaFinal", rotulo: "Data de entrega acordada", tipo: "data", meia: true }
+          { id: "motivoDetalhe", rotulo: "Detalhe do motivo", tipo: "textoLongo", semValor: "Não há motivos adicionais" },
+          { id: "condicaoFinal", rotulo: "Condição de pagamento acordada", tipo: "calculado", formato: "texto", uau: "Fechamento de compra", meia: true,
+            dica: "Vem da proposta do fornecedor escolhido.", calculo: (v) => propostaEscolhida(v).condicao || null },
+          { id: "entregaFinal", rotulo: "Prazo de entrega acordado", tipo: "calculado", formato: "texto", meia: true,
+            dica: "Vem da proposta do fornecedor escolhido.", calculo: (v) => propostaEscolhida(v).prazo || null }
         ]},
         { titulo: "Observações", campos: [
           { id: "observacoes", rotulo: "Observações", tipo: "textoLongo", semValor: "Sem observação" }
@@ -237,13 +239,16 @@ window.CONFIG = {
               { id: "qtde", rotulo: "Qtde.", tipo: "numero", largura: 0.8 },
               { id: "preco", rotulo: "Preço unit.", tipo: "moeda", largura: 1.3 },
               { id: "valor", rotulo: "Valor", tipo: "calculado", formato: "moeda", largura: 1.3, calculo: (l) => num(l.qtde) * num(l.preco) }
-            ]}
+            ]},
+          { id: "difItens", rotulo: "Falta para fechar o valor total", tipo: "calculado", formato: "moeda", destaque: true,
+            dica: "A soma dos itens tem que dar exatamente o valor total do contrato.",
+            calculo: (v) => num(v.valorTotal) ? num(v.valorTotal) - somaTabela(v.itens, "valor") : null }
         ]},
         { titulo: "Vínculo com o planejamento", campos: [
           { id: "vinculos", rotulo: "Vínculos", tipo: "tabela", uau: "Insumos Vinculado", total: "valor",
-            dica: "Diga em qual planejamento (insumo de verba) cada item entra. Um item pode ser dividido em mais de um.",
+            dica: "Escolha um dos itens de cima e diga em qual planejamento (insumo de verba) ele entra. Um item pode ser dividido em mais de um. Cada item tem que ficar 100% vinculado.",
             colunas: [
-              { id: "item", rotulo: "Item do contrato", tipo: "texto", largura: 2.4 },
+              { id: "item", rotulo: "Item do contrato", tipo: "itemDe", fonte: "itens", campo: "descricao", largura: 2.4 },
               { id: "planejamento", rotulo: "Planejamento / insumo vinculado", tipo: "texto", largura: 2.4 },
               { id: "valor", rotulo: "Valor vinculado", tipo: "moeda", largura: 1.3 }
             ]},
@@ -252,16 +257,15 @@ window.CONFIG = {
           { id: "valorVinculado", rotulo: "Valor Vinculado", tipo: "calculado", formato: "moeda", meia: true,
             calculo: (v) => somaTabela(v.vinculos, "valor") },
           { id: "valorAVincular", rotulo: "Valor a Vincular", tipo: "calculado", formato: "moeda", destaque: true,
-            calculo: (v) => (num(v.valorTotal) || somaTabela(v.itens, "valor")) - somaTabela(v.vinculos, "valor"),
-            justificarSe: (r) => Math.abs(r) > 0.005, pergunta: "O Valor a Vincular não está zerado. Por quê?" }
+            calculo: (v) => (num(v.valorTotal) || somaTabela(v.itens, "valor")) - somaTabela(v.vinculos, "valor") }
         ]},
         { titulo: "Condições", campos: [
           { id: "formaMedicao", rotulo: "Como será medido", tipo: "opcao", meia: true, opcoes: ["Mensal fixo", "Por entrega", "Por quantidade", "Outro"] },
-          { id: "reajuste", rotulo: "Reajuste (índice e data-base)", tipo: "texto", meia: true },
-          { id: "cronograma", rotulo: "Cronograma de pagamentos", tipo: "textoLongo" },
+          { id: "reajuste", rotulo: "Reajuste (índice e data-base)", tipo: "texto", semValor: "Não tem reajuste", meia: true },
+          { id: "cronograma", rotulo: "Cronograma de pagamentos", tipo: "textoLongo", soSe: { campo: "formaMedicao", valores: ["Por entrega", "Por quantidade", "Outro"] } },
           { id: "retencao", rotulo: "Retenção / garantia", tipo: "texto", semValor: "Não tem retenção", uau: "Retenção", meia: true },
           { id: "adiantamento", rotulo: "Adiantamento", tipo: "opcao", uau: "Permitir adiantamentos parciais", meia: true, opcoes: ["Não", "Sim"] },
-          { id: "tributos", rotulo: "Tributos retidos (ISS, INSS, IR)", tipo: "texto", uau: "Usar configuração de tributos" }
+          { id: "tributos", rotulo: "Tributos retidos (ISS, INSS, IR)", tipo: "texto", semValor: "Não tem tributos retidos", uau: "Usar configuração de tributos" }
         ]},
         { titulo: "Observações", campos: [
           { id: "observacoes", rotulo: "Observações", tipo: "textoLongo", semValor: "Sem observação" }
@@ -269,7 +273,24 @@ window.CONFIG = {
       ],
       anexos: [
         { id: "contrato", rotulo: "Contrato assinado" }
-      ]
+      ],
+      /* Regras que impedem gerar o PDF enquanto não fecham. */
+      travas: (v) => {
+        const out = [], ok = (a, b) => Math.abs(a - b) < 0.005, m = (x) => x.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+        const cheia = (l) => Object.values(l || {}).some((x) => String(x == null ? "" : x).trim() !== "");
+        const itens = linhasTabela(v.itens).filter(cheia).map((l, i) => ({ nome: String(l.descricao || "").trim() || "Item " + (i + 1), valor: num(l.qtde) * num(l.preco) }));
+        const total = num(v.valorTotal) || itens.reduce((t, i) => t + i.valor, 0);
+        const somaItens = itens.reduce((t, i) => t + i.valor, 0);
+        if (num(v.valorTotal) && !ok(somaItens, num(v.valorTotal))) out.push("A soma dos itens (" + m(somaItens) + ") precisa ser igual ao valor total (" + m(num(v.valorTotal)) + ").");
+        const vinc = linhasTabela(v.vinculos).filter(cheia);
+        for (const it of itens) {
+          const s = vinc.filter((l) => String(l.item || "").trim() === it.nome).reduce((t, l) => t + num(l.valor), 0);
+          if (vinc.length && !ok(s, it.valor)) out.push("O item \"" + it.nome + "\" vale " + m(it.valor) + " e está vinculado em " + m(s) + ".");
+        }
+        if (vinc.some((l) => !String(l.item || "").trim())) out.push("Tem vínculo sem item escolhido.");
+        if (total && !ok(somaTabela(v.vinculos, "valor"), total)) out.push("O Valor a Vincular precisa ficar zerado.");
+        return out;
+      }
     },
 
     {
@@ -285,7 +306,7 @@ window.CONFIG = {
           { id: "numAditivo", rotulo: "Nº aditivo", tipo: "texto", uau: "Aditivo de Contrato", meia: true },
           { id: "objeto", rotulo: "Objeto do contrato", tipo: "texto", uau: "Objeto" },
           { id: "tipoAditivo", rotulo: "Tipo de aditivo", tipo: "opcao", meia: true, opcoes: ["Valor", "Prazo", "Escopo", "Misto"] },
-          { id: "gestor", rotulo: "Gestor do contrato", tipo: "texto", meia: true }
+          { id: "gestor", rotulo: "Responsável pelo aditivo", tipo: "texto", meia: true }
         ]},
         { titulo: "Justificativa do aditivo", campos: [
           { id: "justificativaAditivo", rotulo: "Por que o contrato precisa mudar", tipo: "textoLongo", dica: "O que aconteceu, o que muda e o que acontece se não aditivar." }
@@ -306,9 +327,9 @@ window.CONFIG = {
         ]},
         { titulo: "Vínculo com o planejamento", campos: [
           { id: "vinculos", rotulo: "Vínculos do valor aditivado", tipo: "tabela", uau: "Insumos Vinculado", total: "valor",
-            dica: "Diga em qual planejamento (insumo de verba) entra a diferença de cada item.",
+            dica: "Escolha o item aditivado e diga em qual planejamento (insumo de verba) entra a diferença dele.",
             colunas: [
-              { id: "item", rotulo: "Item", tipo: "texto", largura: 2.4 },
+              { id: "item", rotulo: "Item aditivado", tipo: "itemDe", fonte: "itens", campo: "item", largura: 2.4 },
               { id: "planejamento", rotulo: "Planejamento / insumo vinculado", tipo: "texto", largura: 2.4 },
               { id: "valor", rotulo: "Valor vinculado", tipo: "moeda", largura: 1.3 }
             ]},
@@ -316,11 +337,11 @@ window.CONFIG = {
             calculo: (v) => (linhasTabela(v.itens).reduce((t, l) => t + num(l.qtdeDepois) * num(l.precoDepois) - num(l.qtdeAntes) * num(l.precoAntes), 0)) - somaTabela(v.vinculos, "valor"),
             justificarSe: (r) => Math.abs(r) > 0.005, pergunta: "O Valor a Vincular não está zerado. Por quê?" }
         ]},
-        { titulo: "Prazo", meia: true, campos: [
+        { titulo: "Prazo", meia: true, semValor: "Não houve mudança de prazo", campos: [
           { id: "prazoAntes", rotulo: "Término anterior", tipo: "data" },
           { id: "prazoDepois", rotulo: "Novo término", tipo: "data" }
         ]},
-        { titulo: "Valor do contrato", meia: true, campos: [
+        { titulo: "Valor do contrato", meia: true, semValor: "Não houve mudança de valor", campos: [
           { id: "valorAntesContrato", rotulo: "Valor antes do aditivo", tipo: "moeda" },
           { id: "valorDiferenca", rotulo: "Diferença do aditivo", tipo: "calculado", formato: "moeda",
             calculo: (v) => linhasTabela(v.itens).reduce((t, l) => t + num(l.qtdeDepois) * num(l.precoDepois) - num(l.qtdeAntes) * num(l.precoAntes), 0) },
@@ -338,22 +359,30 @@ window.CONFIG = {
     },
     {
       id: "nao-se-enquadra",
-      sigla: "NSE",
-      nome: "Não se enquadra",
-      titulo: "Pagamento sem contrato e sem cotação",
-      anexarEm: "Anexe no processo de pagamento no UAU.",
-      descricao: "Aluguel, assinatura, conta de consumo, reembolso e outros pagamentos sem contrato nem cotação.",
+      sigla: "OUT",
+      nome: "Outros pagamentos",
+      titulo: "Outros pagamentos",
+      anexarEm: "Anexe na medição ou na confirmação da cotação no UAU, conforme a origem.",
+      descricao: "Aluguel, assinatura, conta de consumo, reembolso e outros que não se encaixam nos modelos acima.",
       secoes: [
         { titulo: "Pagamento", campos: [
           { id: "categoria", rotulo: "Categoria", tipo: "opcao", meia: true,
             opcoes: ["Aluguel", "Assinatura", "Conta de consumo", "Reembolso", "Outros"] },
+          { id: "origem", rotulo: "Lançado no UAU por", tipo: "opcao", meia: true, opcoes: ["Medição", "Cotação"] },
           { id: "numProcesso", rotulo: "Nº do processo no UAU", tipo: "texto", meia: true },
+          { id: "numContrato", rotulo: "Nº contrato", tipo: "texto", uau: "Nº contrato", meia: true, soSe: { campo: "origem", valor: "Medição" } },
+          { id: "numMedicao", rotulo: "Nº medição", tipo: "texto", uau: "Controle de medições", meia: true, soSe: { campo: "origem", valor: "Medição" } },
+          { id: "valorContrato", rotulo: "Valor do contrato", tipo: "moeda", uau: "Valor do Contrato", meia: true, soSe: { campo: "origem", valor: "Medição" } },
+          { id: "medidoAnterior", rotulo: "Medido até a anterior", tipo: "moeda", meia: true, soSe: { campo: "origem", valor: "Medição" } },
+          { id: "numCotacao", rotulo: "Nº cotação", tipo: "texto", uau: "Mapa de Cotação", meia: true, soSe: { campo: "origem", valor: "Cotação" } },
           { id: "oQueE", rotulo: "O que é", tipo: "textoLongo" },
           { id: "competencia", rotulo: "Mês de competência", tipo: "texto", dica: "ex.: 11/2026", meia: true },
-          { id: "valor", rotulo: "Valor", tipo: "moeda", meia: true },
+          { id: "valor", rotulo: "Valor deste pagamento", tipo: "moeda", meia: true },
+          { id: "saldoNse", rotulo: "Saldo do contrato depois deste pagamento", tipo: "calculado", formato: "moeda", destaque: true, soSe: { campo: "origem", valor: "Medição" },
+            calculo: (v) => num(v.valorContrato) ? num(v.valorContrato) - num(v.medidoAnterior) - num(v.valor) : null },
           { id: "vencimento", rotulo: "Vencimento", tipo: "data", meia: true },
           { id: "recorrencia", rotulo: "Recorrência", tipo: "opcao", meia: true, opcoes: ["Único", "Mensal", "Outra"] },
-          { id: "semContrato", rotulo: "Por que não tem contrato nem cotação", tipo: "textoLongo" }
+          { id: "semContrato", rotulo: "Por que não se encaixa nos outros modelos", tipo: "textoLongo", semValor: "Sem justificativa (fica a critério de quem aprova)" }
         ]},
         { titulo: "Observações", campos: [
           { id: "observacoes", rotulo: "Observações", tipo: "textoLongo", semValor: "Sem observação" }
@@ -377,6 +406,10 @@ function num(v) {
 function linhasTabela(l) { return l || []; }
 function somaTabela(linhas, coluna) {
   return (linhas || []).reduce((t, l) => t + num(l[coluna]), 0);
+}
+function propostaEscolhida(v) {
+  const nome = String(v.escolhido || "").trim();
+  return (v.propostas || []).find((l) => String(l.fornecedor || "").trim() === nome) || {};
 }
 function melhorProposta(linhas) {
   const validas = (linhas || []).filter((l) => l.fornecedor && num(l.total));

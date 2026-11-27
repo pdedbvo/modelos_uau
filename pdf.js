@@ -3,7 +3,7 @@
   const { PDFDocument, StandardFonts, rgb, PDFName, PDFHexString } = PDFLib;
   const MM = 72 / 25.4;
   const A4 = [595.28, 841.89];
-  const AREA = { x: 20 * MM, topo: A4[1] - 34 * MM, base: 34 * MM, largura: A4[0] - 40 * MM };
+  const AREA = { x: 20 * MM, topo: A4[1] - 40 * MM, base: 34 * MM, largura: A4[0] - 40 * MM };
   const PRETO = rgb(0.067, 0.067, 0.067), CINZA = rgb(0.392, 0.392, 0.392), CLARO = rgb(0.784, 0.784, 0.784);
   const BLOCO = rgb(0.945, 0.945, 0.945), BRANCO = rgb(1, 1, 1);
   const CHAVE = "DBVOModeloLancamento";
